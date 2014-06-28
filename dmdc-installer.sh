@@ -219,7 +219,7 @@ FSTYPES=""
 QUES=""
 until [[ "$FSTYPES" !=  "" ||  "$QUES" =  "1" ]]
 do
-FSTYPES=`$DIALOGMENU --height=200 $TITLE"$TITLETEXT" --button="Exit":1 --button="OK":0  --list --column=EXT --column="Format in..."  --no-click $TEXT"Please select the type of file system to use. " ext2 "Filesystem Ext2" ext3 "Filesystem Ext3" ext4 "Filesystem Ext4"`
+FSTYPES=`$DIALOGMENU --height=200 $TITLE"$TITLETEXT" --button="Exit":1 --button="OK":0  --list --column=EXT --column="Format in..."  --no-click $TEXT"Please select the type of file system to use. " ext2 "Filesystem Ext2" ext3 "Filesystem Ext3" ext4 "Filesystem Ext4" btrfs " Filesystem btrfs (experimental)" nilfs " Filesystem nilfs (for realiability)"`
 QUES="$?"
 done
  
@@ -261,7 +261,7 @@ HFSTYPE=""
 QUES=""
 until [[ "$HFSTYPE" !=  "" ||  "$QUES" =  "1" ]]
 do
-HFSTYPE=`$DIALOGMENU --height=250 $TITLE"$TITLETEXT" --button="Exit":1 --button="OK":0  --list --column=EXT --column="Format in..."  --no-click $TEXT"Please select the type of file system for the partition <b>home</b>. If there is another <b>home</b> and want to share, select no formatting. Otherwise select a format type. " ext2 "Filesystem Ext2" ext3 "Filesystem Ext3" ext4 "Filesystem Ext4"  NoFormat "Do Not Format the home partition"`
+HFSTYPE=`$DIALOGMENU --height=250 $TITLE"$TITLETEXT" --button="Exit":1 --button="OK":0  --list --column=EXT --column="Format in..."  --no-click $TEXT"Please select the type of file system for the partition <b>home</b>. If there is another <b>home</b> and want to share, select no formatting. Otherwise select a format type. " ext2 "Filesystem Ext2" ext3 "Filesystem Ext3" ext4 "Filesystem Ext4" Btrfs "Btrfs Filesystem" Nilfs "nilfs Filesystem (reliability)"  NoFormat "Do Not Format the home partition"`
 QUES="$?"
 done
 fi
@@ -468,10 +468,10 @@ CONFIR=`$DIALOG --align=right --columns=2 $TITLE"$TITLETEXT" --button="Abort":1 
 --field="                ":LBL "" \
 --field="<b>Settings the physical installation</b>":LBL "" \
 --field="The system will be installed in:":CB $TARGETPART!$FNTARGETPART   \
---field="System File Format:":CB $FSTYPES!ext2!ext3!ext4  \
+--field="System File Format:":CB $FSTYPES!ext2!ext3!ext4!btrfs!nilfs  \
 --field=:LBL "" \
 --field="The HOME will be installed in:":CB $HOMEPART!$FNTARGETPART  \
---field="Format partition HOME:":CB "$HFSTYPE"!NoFormat!ext2!ext3!ext4  \
+--field="Format partition HOME:":CB "$HFSTYPE"!NoFormat!ext2!ext3!ext4!btrfs!nilfs \
 --field=:LBL "" \
 --field="Swap:":CB $SWAP!$FNSWAP  \
 --field="Use Swap:":CB $YESNOSWAP!"yes"!"no"  \
@@ -657,14 +657,14 @@ if [ "`mount | grep $TARGETPART`" ]; then
 echo "Unmounting the partition we are going to use and format now"
 umount /dev/$TARGETPART
 fi
-mke2fs -t $FSTYPES /dev/$TARGETPART
+mkfs.$FSTYPES /dev/$TARGETPART
 mkdir -p /TARGET
 sleep 2
 echo "Mounting the TARGET partition now"
 mount /dev/$TARGETPART /TARGET -o rw
 sleep 2
 echo "Using tune2fs to prevent the forced checks on boot"
-tune2fs -c 0 -i 0 /dev/$TARGETPART
+###tune2fs -c 0 -i 0 /dev/$TARGETPART
 rm -rf "/TARGET/lost+found"
  
  
@@ -679,12 +679,12 @@ if [ "`mount | grep $HOMEPART`" ]; then
 echo "Unmounting the partition we are going to use and format now"
 umount /dev/$HOMEPART
 fi
-mke2fs -t $HFSTYPE /dev/$HOMEPART
+mkfs.$HFSTYPE /dev/$HOMEPART
 fi
 echo "Mounting the TARGET home partition now"
 mkdir -p /TARGET/home
 mount /dev/$HOMEPART /TARGET/home -o rw
-tune2fs -c 0 -i 0 /dev/$HOMEPART
+#tune2fs -c 0 -i 0 /dev/$HOMEPART
 rm -rf "/TARGET/home/lost+found"
 sleep 2
  
