@@ -7,6 +7,8 @@
 #  Copyright 2008-2014 Under the GNU GPL2 License
 
 
+## nuevoos sistemas de archvis Nilfs y Btrfs , falta probar
+
 ## requires yad. 
  
 DIALOGMENU="`which yad` --window-icon=/usr/share/pixmaps/dmdc-installe.png "
